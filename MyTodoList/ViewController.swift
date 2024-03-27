@@ -8,7 +8,12 @@
 import UIKit
 
 class ViewController: UIViewController {
-    var myToDoListArray: [ToDoList] = []
+    //var myToDoListArray: [ToDoList] = []
+    var myToDoListArray: [ToDoList] = [
+        ToDoList(toDoid: 1, toDoTitle: "아침먹기", toDoIsComplete: false),
+        ToDoList(toDoid: 2, toDoTitle: "점심먹기", toDoIsComplete: false),
+        ToDoList(toDoid: 3, toDoTitle: "저녁먹기", toDoIsComplete: false)
+    ]
     var rowCnt: Int = 0
     
     @IBOutlet weak var myTodoListTableView: UITableView!
@@ -27,7 +32,6 @@ class ViewController: UIViewController {
         showAlert()
     }
     
-    
     // MARK: - alert 창 띄우기
     func showAlert() {
         let alertController = UIAlertController(title: "할 일 추가", message: nil, preferredStyle: .alert)
@@ -40,8 +44,11 @@ class ViewController: UIViewController {
             //TextField가 있을 수도 있고 없을 수도 있어서 옵셔널 타입, Alert에 TextField는 1개 이상 사용 가능한데 1개인 경우 .first
             if let inputTextField = alertController.textFields?.first,
                 let textFieldText = inputTextField.text {
-                self.rowCnt += 1
+                
+                self.rowCnt = self.myToDoListArray.count + 1
+                
                 self.myToDoListArray.append(ToDoList(toDoid: self.rowCnt, toDoTitle: textFieldText, toDoIsComplete: false))
+                
                 print(self.myToDoListArray)
                 
                 self.myTodoListTableView.reloadData()   //테이블 뷰 리로드
@@ -52,28 +59,6 @@ class ViewController: UIViewController {
         alertController.addAction(cancelButton)
         alertController.addAction(toDoListAddButton)
         present(alertController, animated: true)
-    }
-    
-    // MARK: - TableView 스와이프(swipe) 삭제, 메서드 자동 완성이 안되는듯?
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            let alertController = UIAlertController(title: "삭제 확인", message: "삭제하시겠습니까?", preferredStyle: .alert)
-            let cancelButton = UIAlertAction(title: "취소", style: .cancel)
-            let deleteButton = UIAlertAction(title: "삭제", style: .default) { _ in
-                //해당 indexPath에 위치한 데이터를 배열에서 제거
-                self.myToDoListArray.remove(at: indexPath.row)
-                // 테이블 뷰에서 해당 행을 애니메이션과 함께 삭제
-                tableView.deleteRows(at: [indexPath], with: .fade)
-            }
-            alertController.addAction(cancelButton)
-            alertController.addAction(deleteButton)
-            present(alertController, animated: true, completion: nil)
-        } else if editingStyle == .insert {
-        }
-    }
-    // MARK: - 삭제 글자 변경 Delete -> 삭제
-    func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
-        return "삭제"
     }
 }
 
@@ -109,6 +94,59 @@ extension ViewController: UITableViewDataSource {
         cell.delegate = self    //스위치 값 변경 이벤트 처리를 위한 delegate 설정
         return cell
     }
+    
+}
+
+// MARK: - TableView Delegate 채택
+extension ViewController: UITableViewDelegate {
+    //navigation bar edit Button 클릭 시
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated) //있어야 Done 버튼 생김
+        myTodoListTableView.setEditing(editing, animated: true)
+    }
+    
+    // MARK: - TableView 스와이프(swipe) 삭제
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            let alertController = UIAlertController(title: "삭제 확인", message: "삭제하시겠습니까?", preferredStyle: .alert)
+            let cancelButton = UIAlertAction(title: "취소", style: .cancel)
+            let deleteButton = UIAlertAction(title: "삭제", style: .default) { _ in
+                //해당 indexPath에 위치한 데이터를 배열에서 제거
+                self.myToDoListArray.remove(at: indexPath.row)
+                // 테이블 뷰에서 해당 행을 애니메이션과 함께 삭제
+                tableView.deleteRows(at: [indexPath], with: .fade)
+            }
+            alertController.addAction(cancelButton)
+            alertController.addAction(deleteButton)
+            present(alertController, animated: true, completion: nil)
+        } else if editingStyle == .insert {
+            print("Aekfjlasef")
+        }
+    }
+        
+    // MARK: - 삭제 글자 변경 Delete -> 삭제
+    func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
+        return "삭제"
+    }
+    
+    // MARK: - 목록 순서 변경
+    func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        //print("sourceIndexPath: \(sourceIndexPath.row), destinationIndexPath: \(destinationIndexPath.row)")
+        
+        //현재 row(출발지)의 cell 데이터 저장
+        let sourceId = myToDoListArray[sourceIndexPath.row].toDoid
+        let sourceTitle = myToDoListArray[sourceIndexPath.row].toDoTitle
+        let sourceIsComplete = myToDoListArray[sourceIndexPath.row].toDoIsComplete
+        
+        //선택한 row 배열에서 삭제
+        myToDoListArray.remove(at: sourceIndexPath.row)
+        
+        //이동한 위치에 출발지 cell 데이터를 배열의 목적지 index 위치에 추가
+        myToDoListArray.insert(ToDoList(toDoid: sourceId, toDoTitle: sourceTitle, toDoIsComplete: sourceIsComplete), at: destinationIndexPath.row)
+        
+        //print("목록 변경 후: \(myToDoListArray)")
+        myTodoListTableView.reloadData()    //변경사항 확인을 위해 새로고침
+    }
 }
 
 // MARK: - 스위치 변경 이벤트 처리를 위한 Delegate 채택
@@ -124,14 +162,6 @@ extension ViewController: MyToDoListCellDelegate {
         myToDoListArray[indexPath.row].toDoIsComplete = isOn
         // 스위치가 변경될 때마다 테이블 뷰의 해당 셀만 다시 로드, 취소선 때문에
         myTodoListTableView.reloadRows(at: [indexPath], with: .automatic)
-    }
-}
-
-extension ViewController: UITableViewDelegate {
-    //navigation bar edit Button 클릭 시
-    override func setEditing(_ editing: Bool, animated: Bool) {
-        //super.setEditing(editing, animated: animated) //없어도 되는뎅.. ?
-        myTodoListTableView.setEditing(editing, animated: true)
     }
 }
 
