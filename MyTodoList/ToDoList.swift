@@ -12,4 +12,5 @@ struct ToDoList {
     var toDoid: Int
     var toDoTitle: String
     var toDoIsComplete: Bool
+    var toDoDetail: String
 }
