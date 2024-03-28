@@ -10,26 +10,48 @@ import UIKit
 class ViewController: UIViewController {
     //var myToDoListArray: [ToDoList] = []
     var myToDoListArray: [ToDoList] = [
-        ToDoList(toDoid: 1, toDoTitle: "아침먹기", toDoIsComplete: false),
-        ToDoList(toDoid: 2, toDoTitle: "점심먹기", toDoIsComplete: false),
-        ToDoList(toDoid: 3, toDoTitle: "저녁먹기", toDoIsComplete: false)
+        ToDoList(toDoid: 1, toDoTitle: "아침먹기", toDoIsComplete: false, toDoDetail: "시리얼"),
+        ToDoList(toDoid: 2, toDoTitle: "점심먹기", toDoIsComplete: false, toDoDetail: "된장찌개"),
+        ToDoList(toDoid: 3, toDoTitle: "저녁먹기", toDoIsComplete: false, toDoDetail: "외식")
     ]
     var rowCnt: Int = 0
     
     @IBOutlet weak var myTodoListTableView: UITableView!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
         myTodoListTableView.dataSource = self
         myTodoListTableView.delegate = self
         
-        self.navigationItem.leftBarButtonItem = self.editButtonItem //상단 Navigation bar 왼쪽에 Edit 버튼 추가
+        //myTodoListTableView.isEditing = false
+        //주석, 코드말고 스토리보드에 버튼추가로 변경
+        //self.navigationItem.leftBarButtonItem = self.editButtonItem //상단 Navigation bar 왼쪽에 Edit 버튼 추가
     }
     
     // MARK: - alert 창 띄우기
     @IBAction func alertButtonTapped(_ sender: UIBarButtonItem) {
         showAlert()
+    }
+       
+    // MARK: - edit 창 선택
+    @IBAction func editButtonTapped(_ sender: UIBarButtonItem) {
+        print(myTodoListTableView.isEditing)
+        //편집 모드와 버튼의 Text는 서로 반대
+        if myTodoListTableView.isEditing {
+            // 편집 모드 해제
+            myTodoListTableView.setEditing(false, animated: true)
+            // 새로운 UIBarButtonItem 생성하여 Edit 버튼으로 설정
+            let editButton = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(editButtonTapped(_:)))
+            navigationItem.leftBarButtonItem = editButton
+        } else {
+            // 편집 모드 활성화
+            myTodoListTableView.setEditing(true, animated: true)
+            
+            // 새로운 UIBarButtonItem 생성하여 Done 버튼으로 설정
+            let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(editButtonTapped(_:)))
+            navigationItem.leftBarButtonItem = doneButton
+        }
     }
     
     // MARK: - alert 창 띄우기
@@ -47,18 +69,30 @@ class ViewController: UIViewController {
                 
                 self.rowCnt = self.myToDoListArray.count + 1
                 
-                self.myToDoListArray.append(ToDoList(toDoid: self.rowCnt, toDoTitle: textFieldText, toDoIsComplete: false))
+                self.myToDoListArray.append(ToDoList(toDoid: self.rowCnt, toDoTitle: textFieldText, toDoIsComplete: false, toDoDetail: ""))
                 
-                print(self.myToDoListArray)
+                //print(self.myToDoListArray)
                 
                 self.myTodoListTableView.reloadData()   //테이블 뷰 리로드
             }
         }
-        
         //버튼 추가 및 alert 창 띄우기
         alertController.addAction(cancelButton)
         alertController.addAction(toDoListAddButton)
         present(alertController, animated: true)
+    }
+    
+    //스토리보드에서의 화면 이동
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "ToDoDetailSegue" {
+            let cell = sender as! UITableViewCell
+            let indexPath = self.myTodoListTableView.indexPath(for: cell)
+            let detailView = segue.destination as! DetailViewController
+            detailView.receiveTitle = myToDoListArray[indexPath!.row].toDoTitle
+            detailView.receiveDetail = myToDoListArray[indexPath!.row].toDoDetail
+            detailView.receiveIndexPath = indexPath!.row
+            detailView.delegate = self
+        }
     }
 }
 
@@ -74,6 +108,9 @@ extension ViewController: UITableViewDataSource {
         //cell 타입이 UITableViewCell이라 UITableViewCell을 상속받는 MyToDoListCell로 다운캐스팅 필요
         let cell = tableView.dequeueReusableCell(withIdentifier: "MyToDoListCell", for: indexPath) as! MyToDoListCell
         
+        //Label 만들지 않았는데 추가하기
+        //cell.textLabel?.text = String(myToDoListArray[indexPath.row].toDoid)
+    
         //cell.myToDoIdLabel.text = String(myToDoListArray[indexPath.row].toDoid)
         cell.myToDoIsCompleteSwitch.isOn = myToDoListArray[indexPath.row].toDoIsComplete
         
@@ -99,36 +136,6 @@ extension ViewController: UITableViewDataSource {
 
 // MARK: - TableView Delegate 채택
 extension ViewController: UITableViewDelegate {
-    //navigation bar edit Button 클릭 시
-    override func setEditing(_ editing: Bool, animated: Bool) {
-        super.setEditing(editing, animated: animated) //있어야 Done 버튼 생김
-        myTodoListTableView.setEditing(editing, animated: true)
-    }
-    
-    // MARK: - TableView 스와이프(swipe) 삭제
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            let alertController = UIAlertController(title: "삭제 확인", message: "삭제하시겠습니까?", preferredStyle: .alert)
-            let cancelButton = UIAlertAction(title: "취소", style: .cancel)
-            let deleteButton = UIAlertAction(title: "삭제", style: .default) { _ in
-                //해당 indexPath에 위치한 데이터를 배열에서 제거
-                self.myToDoListArray.remove(at: indexPath.row)
-                // 테이블 뷰에서 해당 행을 애니메이션과 함께 삭제
-                tableView.deleteRows(at: [indexPath], with: .fade)
-            }
-            alertController.addAction(cancelButton)
-            alertController.addAction(deleteButton)
-            present(alertController, animated: true, completion: nil)
-        } else if editingStyle == .insert {
-            print("Aekfjlasef")
-        }
-    }
-        
-    // MARK: - 삭제 글자 변경 Delete -> 삭제
-    func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
-        return "삭제"
-    }
-    
     // MARK: - 목록 순서 변경
     func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
         //print("sourceIndexPath: \(sourceIndexPath.row), destinationIndexPath: \(destinationIndexPath.row)")
@@ -137,15 +144,66 @@ extension ViewController: UITableViewDelegate {
         let sourceId = myToDoListArray[sourceIndexPath.row].toDoid
         let sourceTitle = myToDoListArray[sourceIndexPath.row].toDoTitle
         let sourceIsComplete = myToDoListArray[sourceIndexPath.row].toDoIsComplete
+        let sourceIsDetail = myToDoListArray[sourceIndexPath.row].toDoDetail
         
         //선택한 row 배열에서 삭제
         myToDoListArray.remove(at: sourceIndexPath.row)
         
         //이동한 위치에 출발지 cell 데이터를 배열의 목적지 index 위치에 추가
-        myToDoListArray.insert(ToDoList(toDoid: sourceId, toDoTitle: sourceTitle, toDoIsComplete: sourceIsComplete), at: destinationIndexPath.row)
+        myToDoListArray.insert(ToDoList(toDoid: sourceId, toDoTitle: sourceTitle, toDoIsComplete: sourceIsComplete, toDoDetail: sourceIsDetail), at: destinationIndexPath.row)
         
         //print("목록 변경 후: \(myToDoListArray)")
         myTodoListTableView.reloadData()    //변경사항 확인을 위해 새로고침
+    }
+    
+    // MARK: - 수정 / 삭제 기능
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+                
+        // 삭제 액션 설정
+        let deleteAction = UIContextualAction(style: .destructive, title: "삭제") { (action, view, completionHandler) in
+            let alertController = UIAlertController(title: "삭제 확인", message: "삭제하시겠습니까?", preferredStyle: .alert)
+            let cancelButton = UIAlertAction(title: "취소", style: .cancel)
+            let deleteButton = UIAlertAction(title: "삭제", style: .default) { _ in
+                // 데이터 소스에서 해당 셀에 대한 데이터를 삭제
+                self.myToDoListArray.remove(at: indexPath.row)
+                // 테이블 뷰에서 해당 셀을 삭제
+                tableView.deleteRows(at: [indexPath], with: .fade)
+            }
+            alertController.addAction(cancelButton)
+            alertController.addAction(deleteButton)
+            self.present(alertController, animated: true)
+        
+            // 처리 완료 핸들러 호출
+            completionHandler(true)
+        }
+        
+        // 수정 액션 설정
+        let editAction = UIContextualAction(style: .normal, title: "수정") { (action, view, completionHandler) in
+            let alertController = UIAlertController(title: "할 일 입력", message: "", preferredStyle: .alert)
+            alertController.addTextField { textField in
+                textField.text = self.myToDoListArray[indexPath.row].toDoTitle
+            }
+            let cancelButton = UIAlertAction(title: "취소", style: .cancel)
+            let editButton = UIAlertAction(title: "수정", style: .default) { _ in
+                if let editTextField = alertController.textFields?.first,
+                   let text = editTextField.text {
+                    self.myToDoListArray[indexPath.row].toDoTitle = text
+                    // 수정됐는지 확인하기 위해 row 새로고침
+                    self.myTodoListTableView.reloadRows(at: [indexPath], with: .automatic)
+                }
+            }
+            alertController.addAction(cancelButton)
+            alertController.addAction(editButton)
+            self.present(alertController, animated: true)
+            
+            completionHandler(true)
+        }
+        
+        // 버튼들을 배열로 묶어서 스와이프 액션 구성
+        let swipeConfiguration = UISwipeActionsConfiguration(actions: [deleteAction, editAction])
+        
+        // 스와이프 액션 구성 반환
+        return swipeConfiguration
     }
 }
 
@@ -153,15 +211,23 @@ extension ViewController: UITableViewDelegate {
 extension ViewController: MyToDoListCellDelegate {
     func switchValueChanged(_ cell: MyToDoListCell, isOn: Bool) {
         //해당 셀의 인덱스 가져여오기
-        guard let indexPath = myTodoListTableView.indexPath(for: cell) else {
-            return
-        }
+        guard let indexPath = myTodoListTableView.indexPath(for: cell) else { return }
         //print("cell index: \(indexPath)") //ex [0, 1]
         
         // 스위치 값을 배열에 반영
         myToDoListArray[indexPath.row].toDoIsComplete = isOn
         // 스위치가 변경될 때마다 테이블 뷰의 해당 셀만 다시 로드, 취소선 때문에
         myTodoListTableView.reloadRows(at: [indexPath], with: .automatic)
+    }
+}
+
+// MARK: - 디테일 뷰에서 디테일 입력
+extension ViewController: DetailViewControllerDelegate {
+    func textViewDidChange(_ controller: DetailViewController, textView: String) {
+        if let indexPath = controller.receiveIndexPath {
+            //자동저장되도록 수정
+            myToDoListArray[indexPath].toDoDetail = textView
+        }
     }
 }
 
@@ -175,3 +241,4 @@ extension String {
         return attributeString
     }
 }
+

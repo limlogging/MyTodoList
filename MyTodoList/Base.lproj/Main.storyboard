@@ -35,7 +35,7 @@
                                                     </connections>
                                                 </switch>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="877-Lc-93T">
-                                                    <rect key="frame" x="20" y="12" width="314" height="21"/>
+                                                    <rect key="frame" x="20" y="12" width="311" height="21"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <nil key="textColor"/>
@@ -46,6 +46,7 @@
                                         <connections>
                                             <outlet property="myToDoIsCompleteSwitch" destination="bS1-ET-ot3" id="tNK-A5-y0F"/>
                                             <outlet property="myToDoTitleLabel" destination="877-Lc-93T" id="zH8-Rp-At8"/>
+                                            <segue destination="ke7-BJ-lOB" kind="show" identifier="ToDoDetailSegue" id="z9b-9r-U9u"/>
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>
@@ -61,6 +62,11 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="To Do List" id="eDg-rU-g8v">
+                        <barButtonItem key="leftBarButtonItem" style="plain" systemItem="edit" id="iZI-dy-kGF">
+                            <connections>
+                                <action selector="editButtonTapped:" destination="BYZ-38-t0r" id="FtQ-gI-ZQy"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" style="plain" systemItem="add" id="CJf-MH-faj">
                             <connections>
                                 <action selector="alertButtonTapped:" destination="BYZ-38-t0r" id="FVu-iL-t55"/>
@@ -73,7 +79,101 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="759.5419847328244" y="-35.211267605633807"/>
+            <point key="canvasLocation" x="815" y="-35"/>
+        </scene>
+        <!--To Do Detail-->
+        <scene sceneID="6V2-zf-JBz">
+            <objects>
+                <viewController id="ke7-BJ-lOB" customClass="DetailViewController" customModule="MyTodoList" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Hyf-9n-BrZ">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cCJ-FH-xZz">
+                                <rect key="frame" x="10" y="113" width="373" height="75"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="fmQ-e1-7eF">
+                                        <rect key="frame" x="10" y="10" width="353" height="55"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="To Do Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4iz-fc-BsN">
+                                                <rect key="frame" x="0.0" y="0.0" width="353" height="24"/>
+                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="20"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" ambiguous="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="9gv-uY-wIA">
+                                                <rect key="frame" x="0.0" y="29" width="353" height="26"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                <textInputTraits key="textInputTraits"/>
+                                            </textField>
+                                        </subviews>
+                                        <constraints>
+                                            <constraint firstAttribute="trailing" secondItem="4iz-fc-BsN" secondAttribute="trailing" id="yDc-KQ-3Od"/>
+                                            <constraint firstAttribute="trailing" secondItem="9gv-uY-wIA" secondAttribute="trailing" id="yGu-iz-QU4"/>
+                                        </constraints>
+                                    </stackView>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="75" id="6kp-c5-syU"/>
+                                    <constraint firstItem="fmQ-e1-7eF" firstAttribute="top" secondItem="cCJ-FH-xZz" secondAttribute="top" constant="10" id="HsI-Wz-3tG"/>
+                                    <constraint firstAttribute="bottom" secondItem="fmQ-e1-7eF" secondAttribute="bottom" constant="10" id="fx5-GR-KU5"/>
+                                    <constraint firstAttribute="trailing" secondItem="fmQ-e1-7eF" secondAttribute="trailing" constant="10" id="jSB-cd-it2"/>
+                                    <constraint firstItem="fmQ-e1-7eF" firstAttribute="leading" secondItem="cCJ-FH-xZz" secondAttribute="leading" constant="10" id="z6z-Ws-zsJ"/>
+                                </constraints>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="RrU-ZG-tUE">
+                                <rect key="frame" x="10" y="198" width="373" height="220"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="bQD-Nf-kyY">
+                                        <rect key="frame" x="10" y="10" width="353" height="200"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="To Do Detail" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6h3-U3-scj">
+                                                <rect key="frame" x="0.0" y="0.0" width="353" height="24"/>
+                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="20"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="9BL-XP-gkp">
+                                                <rect key="frame" x="0.0" y="29" width="353" height="171"/>
+                                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                                <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
+                                                <color key="textColor" systemColor="labelColor"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                            </textView>
+                                        </subviews>
+                                    </stackView>
+                                </subviews>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="bQD-Nf-kyY" secondAttribute="trailing" constant="10" id="09n-e2-kkD"/>
+                                    <constraint firstItem="bQD-Nf-kyY" firstAttribute="leading" secondItem="RrU-ZG-tUE" secondAttribute="leading" constant="10" id="BmW-bM-En0"/>
+                                    <constraint firstAttribute="bottom" secondItem="bQD-Nf-kyY" secondAttribute="bottom" constant="10" id="hFA-ST-ISd"/>
+                                    <constraint firstItem="bQD-Nf-kyY" firstAttribute="top" secondItem="RrU-ZG-tUE" secondAttribute="top" constant="10" id="kRQ-00-GdJ"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="t7N-jJ-n40"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="t7N-jJ-n40" firstAttribute="trailing" secondItem="RrU-ZG-tUE" secondAttribute="trailing" constant="10" id="7AS-Va-4FT"/>
+                            <constraint firstItem="t7N-jJ-n40" firstAttribute="bottom" secondItem="RrU-ZG-tUE" secondAttribute="bottom" constant="400" id="F0H-BA-fph"/>
+                            <constraint firstItem="cCJ-FH-xZz" firstAttribute="leading" secondItem="t7N-jJ-n40" secondAttribute="leading" constant="10" id="ZqK-Ad-N3S"/>
+                            <constraint firstItem="RrU-ZG-tUE" firstAttribute="top" secondItem="cCJ-FH-xZz" secondAttribute="bottom" constant="10" id="fiO-Qm-Wp2"/>
+                            <constraint firstItem="RrU-ZG-tUE" firstAttribute="leading" secondItem="t7N-jJ-n40" secondAttribute="leading" constant="10" id="loJ-WH-LNg"/>
+                            <constraint firstItem="cCJ-FH-xZz" firstAttribute="top" secondItem="t7N-jJ-n40" secondAttribute="top" constant="10" id="pvB-Ou-Nuw"/>
+                            <constraint firstItem="t7N-jJ-n40" firstAttribute="trailing" secondItem="cCJ-FH-xZz" secondAttribute="trailing" constant="10" id="qWC-gg-YdH"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="To Do Detail" id="Rff-pV-e5O"/>
+                    <connections>
+                        <outlet property="detailTextView" destination="9BL-XP-gkp" id="bIc-f1-GR2"/>
+                        <outlet property="titleTextField" destination="9gv-uY-wIA" id="VGp-Jv-dni"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="T3U-hN-VRU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1460" y="-35"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="gtd-gd-PMa">
@@ -95,6 +195,9 @@
         </scene>
     </scenes>
     <resources>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
