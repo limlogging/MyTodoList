@@ -10,33 +10,40 @@ import UIKit
 class ViewController: UIViewController {
     //var myToDoListArray: [ToDoList] = []
     var myToDoListArray: [ToDoList] = [
-        ToDoList(toDoid: 1, toDoTitle: "아침먹기", toDoIsComplete: false, toDoDetail: "시리얼"),
-        ToDoList(toDoid: 2, toDoTitle: "점심먹기", toDoIsComplete: false, toDoDetail: "된장찌개"),
-        ToDoList(toDoid: 3, toDoTitle: "저녁먹기", toDoIsComplete: false, toDoDetail: "외식")
+        ToDoList(toDoid: 1, toDoTitle: "아침먹기", toDoIsComplete: false, toDoDetail: "시리얼, 우유, 홍삼, 영양제"),
+        ToDoList(toDoid: 2, toDoTitle: "알고리즘 문제", toDoIsComplete: false, toDoDetail: "프로그래머스"),
+        ToDoList(toDoid: 3, toDoTitle: "개인과제", toDoIsComplete: false, toDoDetail: "View Controller, Table View"),
+        ToDoList(toDoid: 4, toDoTitle: "점심먹기", toDoIsComplete: false, toDoDetail: "된장찌개, 아이스 아메리카노"),
+        ToDoList(toDoid: 4, toDoTitle: "독서", toDoIsComplete: false, toDoDetail: "iOS관련"),
+        ToDoList(toDoid: 5, toDoTitle: "저녁먹기", toDoIsComplete: false, toDoDetail: "외식, 초밥"),
+        ToDoList(toDoid: 6, toDoTitle: "오늘 하루 회고", toDoIsComplete: false, toDoDetail: "오늘 한일 ?"),
+        ToDoList(toDoid: 7, toDoTitle: "Til 작성", toDoIsComplete: false, toDoDetail: "오늘의 TIL?")
+        
     ]
     var rowCnt: Int = 0
     
     @IBOutlet weak var myTodoListTableView: UITableView!
-
+    @IBOutlet weak var myTodoTotalLabel: UILabel!
+    @IBOutlet weak var myToDoCompleteCount: UILabel!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         myTodoListTableView.dataSource = self
         myTodoListTableView.delegate = self
         
-        //myTodoListTableView.isEditing = false
-        //주석, 코드말고 스토리보드에 버튼추가로 변경
-        //self.navigationItem.leftBarButtonItem = self.editButtonItem //상단 Navigation bar 왼쪽에 Edit 버튼 추가
+        //합계 및 완료
+        myTodoTotalLabel.text = String(myToDoListArray.count)
+        myToDoCompleteCount.text = String(myToDoListArray.filter({ $0.toDoIsComplete == true }).count)
     }
     
     // MARK: - alert 창 띄우기
     @IBAction func alertButtonTapped(_ sender: UIBarButtonItem) {
-        showAlert()
+        showAddAlert()
     }
        
     // MARK: - edit 창 선택
     @IBAction func editButtonTapped(_ sender: UIBarButtonItem) {
-        print(myTodoListTableView.isEditing)
+        //print(myTodoListTableView.isEditing)
         //편집 모드와 버튼의 Text는 서로 반대
         if myTodoListTableView.isEditing {
             // 편집 모드 해제
@@ -55,7 +62,7 @@ class ViewController: UIViewController {
     }
     
     // MARK: - alert 창 띄우기
-    func showAlert() {
+    func showAddAlert() {
         let alertController = UIAlertController(title: "할 일 추가", message: nil, preferredStyle: .alert)
         alertController.addTextField { alertTextField in
             alertTextField.placeholder = "할 일을 입력하세요."
@@ -72,7 +79,7 @@ class ViewController: UIViewController {
                 self.myToDoListArray.append(ToDoList(toDoid: self.rowCnt, toDoTitle: textFieldText, toDoIsComplete: false, toDoDetail: ""))
                 
                 //print(self.myToDoListArray)
-                
+                self.myTodoTotalLabel.text = String(self.myToDoListArray.count) //추가하고 총합 수정
                 self.myTodoListTableView.reloadData()   //테이블 뷰 리로드
             }
         }
@@ -91,7 +98,8 @@ class ViewController: UIViewController {
             detailView.receiveTitle = myToDoListArray[indexPath!.row].toDoTitle
             detailView.receiveDetail = myToDoListArray[indexPath!.row].toDoDetail
             detailView.receiveIndexPath = indexPath!.row
-            detailView.delegate = self
+            detailView.titleDelegate = self     //타이틀처리를 위한 TextField 델리게이트
+            detailView.detailDelegate = self    //디테일처리를 위한 TextView 델리게이트
         }
     }
 }
@@ -104,18 +112,9 @@ extension ViewController: UITableViewDataSource {
     }
     // MARK: - TableView Row에서 보여줄 컨텐츠
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
         //cell 타입이 UITableViewCell이라 UITableViewCell을 상속받는 MyToDoListCell로 다운캐스팅 필요
         let cell = tableView.dequeueReusableCell(withIdentifier: "MyToDoListCell", for: indexPath) as! MyToDoListCell
-        
-        //Label 만들지 않았는데 추가하기
-        //cell.textLabel?.text = String(myToDoListArray[indexPath.row].toDoid)
-    
-        //cell.myToDoIdLabel.text = String(myToDoListArray[indexPath.row].toDoid)
         cell.myToDoIsCompleteSwitch.isOn = myToDoListArray[indexPath.row].toDoIsComplete
-        
-        //title 취소선 - 기존 코드 주석
-        //cell.myToDoTitleLabel.text = myToDoListArray[indexPath.row].toDoTitle
         
         //title 취소선 - switch 값에 따라 취소선 또는 일반 Text
         if cell.myToDoIsCompleteSwitch.isOn {
@@ -127,11 +126,11 @@ extension ViewController: UITableViewDataSource {
             //일반 Text - 취소선 없애기
             cell.myToDoTitleLabel.attributedText = NSAttributedString(string: myToDoListArray[indexPath.row].toDoTitle)
         }
+        cell.myToDoDetailLabel.text = myToDoListArray[indexPath.row].toDoDetail //디테일 추가
         
         cell.delegate = self    //스위치 값 변경 이벤트 처리를 위한 delegate 설정
         return cell
     }
-    
 }
 
 // MARK: - TableView Delegate 채택
@@ -139,7 +138,6 @@ extension ViewController: UITableViewDelegate {
     // MARK: - 목록 순서 변경
     func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
         //print("sourceIndexPath: \(sourceIndexPath.row), destinationIndexPath: \(destinationIndexPath.row)")
-        
         //현재 row(출발지)의 cell 데이터 저장
         let sourceId = myToDoListArray[sourceIndexPath.row].toDoid
         let sourceTitle = myToDoListArray[sourceIndexPath.row].toDoTitle
@@ -151,12 +149,12 @@ extension ViewController: UITableViewDelegate {
         
         //이동한 위치에 출발지 cell 데이터를 배열의 목적지 index 위치에 추가
         myToDoListArray.insert(ToDoList(toDoid: sourceId, toDoTitle: sourceTitle, toDoIsComplete: sourceIsComplete, toDoDetail: sourceIsDetail), at: destinationIndexPath.row)
-        
+    
         //print("목록 변경 후: \(myToDoListArray)")
         myTodoListTableView.reloadData()    //변경사항 확인을 위해 새로고침
     }
     
-    // MARK: - 수정 / 삭제 기능
+    // MARK: - 스와이프 수정 / 삭제 기능
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
                 
         // 삭제 액션 설정
@@ -168,6 +166,10 @@ extension ViewController: UITableViewDelegate {
                 self.myToDoListArray.remove(at: indexPath.row)
                 // 테이블 뷰에서 해당 셀을 삭제
                 tableView.deleteRows(at: [indexPath], with: .fade)
+                
+                //전체 수 및 완료 다시 불러오기
+                self.myTodoTotalLabel.text = String(self.myToDoListArray.count)
+                self.myToDoCompleteCount.text = String(self.myToDoListArray.filter({ $0.toDoIsComplete == true }).count)
             }
             alertController.addAction(cancelButton)
             alertController.addAction(deleteButton)
@@ -178,7 +180,7 @@ extension ViewController: UITableViewDelegate {
         }
         
         // 수정 액션 설정
-        let editAction = UIContextualAction(style: .normal, title: "수정") { (action, view, completionHandler) in
+        let editAction = UIContextualAction(style: .normal, title: "Title 수정") { (action, view, completionHandler) in
             let alertController = UIAlertController(title: "할 일 입력", message: "", preferredStyle: .alert)
             alertController.addTextField { textField in
                 textField.text = self.myToDoListArray[indexPath.row].toDoTitle
@@ -218,15 +220,24 @@ extension ViewController: MyToDoListCellDelegate {
         myToDoListArray[indexPath.row].toDoIsComplete = isOn
         // 스위치가 변경될 때마다 테이블 뷰의 해당 셀만 다시 로드, 취소선 때문에
         myTodoListTableView.reloadRows(at: [indexPath], with: .automatic)
+        myToDoCompleteCount.text = String(myToDoListArray.filter({ $0.toDoIsComplete == true }).count)
     }
 }
-
+// MARK: - 디테일 뷰에서 타이틀 입력
+extension ViewController: DetailViewControllerTitleDelegate {
+    func textFieldDidChangeSelection(_ controller: DetailViewController, textField: String) {
+        if let indexPath = controller.receiveIndexPath {
+            myToDoListArray[indexPath].toDoTitle = textField    //타이틀 자동저장
+            self.myTodoListTableView.reloadData()   //테이블 뷰 리로드
+        }
+    }
+}
 // MARK: - 디테일 뷰에서 디테일 입력
-extension ViewController: DetailViewControllerDelegate {
+extension ViewController: DetailViewControllerDetailDelegate {
     func textViewDidChange(_ controller: DetailViewController, textView: String) {
         if let indexPath = controller.receiveIndexPath {
-            //자동저장되도록 수정
-            myToDoListArray[indexPath].toDoDetail = textView
+            myToDoListArray[indexPath].toDoDetail = textView    //디테일 자동저장
+            self.myTodoListTableView.reloadData()   //테이블 뷰 리로드
         }
     }
 }
