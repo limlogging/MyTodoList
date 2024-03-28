@@ -13,9 +13,9 @@ protocol MyToDoListCellDelegate: AnyObject {
 }
 
 class MyToDoListCell: UITableViewCell {
-    @IBOutlet weak var myToDoIdLabel: UILabel!              //할 일 id
     @IBOutlet weak var myToDoTitleLabel: UILabel!           //할 일 제목
     @IBOutlet weak var myToDoIsCompleteSwitch: UISwitch!    //할 일 완료 여부 스위치
+    @IBOutlet weak var myToDoDetailLabel: UILabel!          //할일 상세내용
     
     var delegate: MyToDoListCellDelegate?   //스위치 값 변경 이벤트를 처리할 delegate
     
